@@ -385,6 +385,49 @@ function subscribeAiTools() {
   }
 }
 
+
+const dmHelpLanguages = [
+  {
+    button: 'English',
+    label: 'Need help?',
+    text: 'If you cannot generate your photo yourself, DM us on Instagram. Send your photo and selected prompt.'
+  },
+  {
+    button: 'हिंदी',
+    label: 'मदद चाहिए?',
+    text: 'अगर आप अपनी फोटो खुद generate नहीं कर पा रहे हैं, तो Instagram पर DM करें. अपनी photo और selected prompt भेजें.'
+  },
+  {
+    button: 'ગુજરાતી',
+    label: 'મદદ જોઈએ છે?',
+    text: 'જો તમારાથી photo generate ન થતો હોય, તો Instagram પર DM કરો. તમારો photo અને selected prompt મોકલો.'
+  }
+];
+
+let dmHelpLanguageIndex = 0;
+
+function changeDmLanguage() {
+  dmHelpLanguageIndex = (dmHelpLanguageIndex + 1) % dmHelpLanguages.length;
+  const data = dmHelpLanguages[dmHelpLanguageIndex];
+
+  const card = document.getElementById('dmHelpCard');
+  const label = document.getElementById('dmHelpLabel');
+  const text = document.getElementById('dmHelpText');
+  const button = document.getElementById('dmLangBtn');
+
+  if (!label || !text || !button) return;
+
+  label.textContent = data.label;
+  text.textContent = data.text;
+  button.textContent = data.button;
+
+  if (card) {
+    card.classList.remove('text-swap');
+    void card.offsetWidth;
+    card.classList.add('text-swap');
+  }
+}
+
 function scrollToSection(id) {
   const el = document.getElementById(id);
   if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -890,16 +933,7 @@ async function sharePrompt(id) {
 
 function openAdminModal() {
   document.getElementById('adminModal').classList.remove('hidden');
-
-  const loginView = document.getElementById('loginView');
-  const adminView = document.getElementById('adminView');
-
-  if (loginView) loginView.classList.add('hidden');
-  if (adminView) adminView.classList.remove('hidden');
-
-  renderAdminList();
-  fetchImportantNotice();
-  renderToolsAdminList();
+  checkAdminState();
 }
 
 function closeAdminModal() {
@@ -933,15 +967,11 @@ async function logoutAdmin() {
 }
 
 async function checkAdminState() {
-  const loginView = document.getElementById('loginView');
-  const adminView = document.getElementById('adminView');
-
-  if (loginView) loginView.classList.add('hidden');
-  if (adminView) adminView.classList.remove('hidden');
-
-  renderAdminList();
-  fetchImportantNotice();
-  renderToolsAdminList();
+  const { data } = await supabaseClient.auth.getSession();
+  const hasSession = !!data.session;
+  document.getElementById('loginView').classList.toggle('hidden', hasSession);
+  document.getElementById('adminView').classList.toggle('hidden', !hasSession);
+  if (hasSession) { renderAdminList(); fetchImportantNotice(); renderToolsAdminList(); }
 }
 
 function clearForm() {
