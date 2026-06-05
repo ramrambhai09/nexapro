@@ -1733,3 +1733,43 @@ button,input,textarea,select{font:inherit}
     font-size:11px;
   }
 }
+
+
+
+/* Shared direct container link highlight */
+.prompt-card.shared-focus{
+  position:relative;
+  animation:sharedCardPulse 2.2s ease-in-out 3;
+  border-color:rgba(51,216,255,.74) !important;
+  box-shadow:
+    0 0 0 2px rgba(51,216,255,.22),
+    0 0 42px rgba(51,216,255,.35),
+    0 34px 95px rgba(134,93,255,.32) !important;
+}
+.prompt-card.shared-focus::after{
+  content:"Shared Prompt";
+  position:absolute;
+  top:14px;
+  right:14px;
+  z-index:6;
+  padding:8px 12px;
+  border-radius:999px;
+  color:#fff;
+  font-size:12px;
+  font-weight:900;
+  background:linear-gradient(135deg,#33d8ff,#865dff);
+  box-shadow:0 0 24px rgba(51,216,255,.36);
+  pointer-events:none;
+}
+@keyframes sharedCardPulse{
+  0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-6px) scale(1.015)}
+}
+@media(max-width:780px){
+  .prompt-card.shared-focus::after{
+    top:10px;
+    right:10px;
+    font-size:10px;
+    padding:7px 10px;
+  }
+}
