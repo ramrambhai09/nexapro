@@ -890,7 +890,16 @@ async function sharePrompt(id) {
 
 function openAdminModal() {
   document.getElementById('adminModal').classList.remove('hidden');
-  checkAdminState();
+
+  const loginView = document.getElementById('loginView');
+  const adminView = document.getElementById('adminView');
+
+  if (loginView) loginView.classList.add('hidden');
+  if (adminView) adminView.classList.remove('hidden');
+
+  renderAdminList();
+  fetchImportantNotice();
+  renderToolsAdminList();
 }
 
 function closeAdminModal() {
@@ -924,11 +933,15 @@ async function logoutAdmin() {
 }
 
 async function checkAdminState() {
-  const { data } = await supabaseClient.auth.getSession();
-  const hasSession = !!data.session;
-  document.getElementById('loginView').classList.toggle('hidden', hasSession);
-  document.getElementById('adminView').classList.toggle('hidden', !hasSession);
-  if (hasSession) { renderAdminList(); fetchImportantNotice(); renderToolsAdminList(); }
+  const loginView = document.getElementById('loginView');
+  const adminView = document.getElementById('adminView');
+
+  if (loginView) loginView.classList.add('hidden');
+  if (adminView) adminView.classList.remove('hidden');
+
+  renderAdminList();
+  fetchImportantNotice();
+  renderToolsAdminList();
 }
 
 function clearForm() {
