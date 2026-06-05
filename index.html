@@ -40,7 +40,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
 <body>
   <div class="page-glow glow-a"></div>
@@ -89,6 +88,17 @@
             <span class="visit-eye">👁</span>
             <span id="liveVisitCount">0</span>
           </div>
+        </div>
+
+        <div class="dm-help-card" id="dmHelpCard">
+          <div class="dm-help-glow"></div>
+          <div class="dm-help-icon">💬</div>
+          <div class="dm-help-content">
+            <span class="dm-help-label" id="dmHelpLabel">Need help?</span>
+            <p id="dmHelpText">If you cannot generate your photo yourself, DM us on Instagram. Send your photo and selected prompt.</p>
+            <a class="dm-help-link" href="https://www.instagram.com/nexaprom.ai" target="_blank" rel="noopener" id="dmHelpLink">@nexaprom.ai</a>
+          </div>
+          <button class="dm-lang-btn" type="button" onclick="changeDmLanguage()" id="dmLangBtn">English</button>
         </div>
       </div>
 
