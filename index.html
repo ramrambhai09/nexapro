@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  
+  <meta name="description" content="NexaProm is a premium AI photo prompt gallery for male and female AI image prompts, viral Instagram edits, 3D portraits, cinematic photo prompts, vintage poster prompts, and AI image generator tools.">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="NexaProm">
+  <meta name="theme-color" content="#080914">
+  <link rel="canonical" href="https://nexaprom.vercel.app/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="NexaProm">
+  <meta property="og:title" content="NexaProm - AI Photo Prompt Gallery">
+  <meta property="og:description" content="NexaProm is a premium AI photo prompt gallery for male and female AI image prompts, viral Instagram edits, 3D portraits, cinematic photo prompts, vintage poster prompts, and AI image generator tools.">
+  <meta property="og:url" content="https://nexaprom.vercel.app/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="NexaProm - AI Photo Prompt Gallery">
+  <meta name="twitter:description" content="NexaProm is a premium AI photo prompt gallery for male and female AI image prompts, viral Instagram edits, 3D portraits, cinematic photo prompts, vintage poster prompts, and AI image generator tools.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "NexaProm",
+    "alternateName": ["nexaprom", "nexa prompt", "nexa prompts", "nexa pro prompt", "ai prompt gallery"],
+    "url": "https://nexaprom.vercel.app/",
+    "description": "NexaProm is a premium AI photo prompt gallery for male and female AI image prompts, viral Instagram edits, 3D portraits, cinematic photo prompts, vintage poster prompts, and AI image generator tools.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://nexaprom.vercel.app/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+<meta name="google-adsense-account" content="ca-pub-6736985925406459">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6736985925406459"
+     crossorigin="anonymous"></script>
+  <title>NexaProm - AI Photo Prompt Gallery | Male & Female AI Image Prompts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page-glow glow-a"></div>
+  <div class="page-glow glow-b"></div>
+  <div class="page-glow glow-c"></div>
+
+  <header id="topbar" class="topbar">
+    <div class="brand secret-admin-trigger" onclick="handleSecretAdminClick()" title="nexapro">
+      <div class="logo3d">NX</div>
+      <div>
+        <h1>nexapro</h1>
+        <p>Premium AI prompt showcase</p>
+      </div>
+    </div>
+
+    <nav class="topnav">
+      <button class="nav-btn" onclick="scrollToSection('gallery')">Gallery</button>
+      <button class="nav-btn" onclick="scrollToSection('how')">How It Works</button>
+    </nav>
+  </header>
+
+  <div id="importantNoticeBar" class="important-notice hidden">
+    <div class="notice-label">Important</div>
+    <div class="notice-marquee">
+      <span id="importantNoticeText">You can replace the name shown in any prompt with your own name before generating the image.</span>
+    </div>
+  </div>
+
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <a class="instagram-glow" href="https://www.instagram.com/nexapro.ai" target="_blank" rel="noopener">
+          <span class="ig-dot"></span>
+          @nexapro.ai
+        </a>
+        <span class="badge">Viral 3D Prompt Platform</span>
+        <h2>Create stunning AI images from premium prompts</h2>
+        <p class="hero-text">
+          Browse premium prompt containers, preview style images, copy the prompt instantly,
+          and recreate the same look using your own photo in any AI image tool.
+        </p>
+        <div class="hero-actions">
+          <button class="primary-btn" onclick="scrollToSection('gallery')">Explore Prompts</button>
+          <div class="visit-counter" title="Live website visits">
+            <span class="visit-eye">👁</span>
+            <span id="liveVisitCount">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="floating-chip chip-left">3D Portrait</div>
+        <div class="floating-chip chip-right">Auto Preview</div>
+        <div class="phone-shell tilt-card">
+          <div class="phone-notch"></div>
+          <div class="phone-image-stage">
+            <img id="heroPreviewImage" class="hero-preview-image" alt="Featured AI preview" src="" />
+          </div>
+          <div class="hero-overlay-title" id="heroPreviewTitle">Premium AI Portrait</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats-wrap">
+      <div class="stat-card"><strong id="totalCards">0</strong><span>Total Containers</span></div>
+      <div class="stat-card"><strong id="totalImages">0</strong><span>Total Photos</span></div>
+      <div class="stat-card"><strong id="totalCategories">0</strong><span>Categories</span></div>
+    </section>
+
+    <section id="toolsSection" class="tools-section">
+      <div class="tools-head">
+        <div>
+          <span>Tools</span>
+          <h2>Create images with these AI tools</h2>
+        </div>
+        <p>Use these tools after copying a prompt from nexapro.</p>
+      </div>
+      <div id="toolsGrid" class="tools-grid"></div>
+    </section>
+
+    <section id="gallery" class="section-block">
+      <div class="section-title">
+        <span>Prompt Gallery</span>
+        <h2>Choose Male or Female prompts</h2>
+      </div>
+
+      
+      <div class="seo-keyword-box glass-panel">
+        <h3>Trending AI Photo Prompt Categories</h3>
+        <p>
+          Explore AI photo prompts for male portraits, female portraits, Instagram viral edits,
+          3D portrait prompts, cinematic AI photos, vintage poster edits, attitude photo prompts,
+          floral editorial prompts, royal portrait prompts, couple concepts, and AI image generator prompts.
+        </p>
+      </div>
+
+      <div class="toolbar glass-panel">
+        <input id="searchInput" type="text" placeholder="Search by title, category, or prompt..." oninput="renderGallery()" />
+        <select id="categoryFilter" onchange="renderGallery()">
+          <option value="All">All Prompts</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+      </div>
+
+      <div id="cardsGrid" class="cards-grid"></div>
+      <div id="paginationControls" class="pagination-controls"></div>
+    </section>
+
+    <section id="how" class="section-block">
+      <div class="section-title">
+        <span>How It Works</span>
+        <h2>Use nexapro in 3 simple steps</h2>
+      </div>
+
+      <div class="steps-grid">
+        <article class="step-card glass-panel">
+          <b>01</b>
+          <h3>Open any prompt container</h3>
+          <p>Choose Male/Female and preview multiple reference images inside each card.</p>
+        </article>
+        <article class="step-card glass-panel">
+          <b>02</b>
+          <h3>Copy the prompt</h3>
+          <p>Tap the Copy Prompt button and paste the prompt into your favorite AI image tool.</p>
+        </article>
+        <article class="step-card glass-panel">
+          <b>03</b>
+          <h3>Use your own photo</h3>
+          <p>Upload your own face/photo in the AI tool and generate a similar style result.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <div id="copyBurst" class="copy-burst hidden">
+    <div class="burst-icon">✓</div>
+    <div class="burst-text">Prompt Copied</div>
+  </div>
+
+  <div id="toast" class="toast">Copied!</div>
+
+  <div id="adminModal" class="modal hidden">
+    <div class="modal-backdrop" onclick="closeAdminModal()"></div>
+    <div class="admin-box">
+      <button class="close-btn" onclick="closeAdminModal()">×</button>
+
+      <div id="loginView">
+        <h2>Admin Login</h2>
+        <p>Upload, edit, update, and manage prompt containers from your creator panel.</p>
+        <div class="admin-form">
+          <input id="adminEmail" type="email" placeholder="Admin Email" />
+          <input id="adminPass" type="password" placeholder="Password" />
+          <button class="primary-btn full-btn" onclick="adminLogin()">Login</button>
+          <small>Hidden access: click the nexapro brand 4 times.</small>
+        </div>
+      </div>
+
+      <div id="adminView" class="hidden">
+        <div class="admin-head">
+          <div>
+            <h2>Creator Management Panel</h2>
+            <p>Create one container with multiple images, update prompts anytime, and manage Male and Female prompt types easily.</p>
+          </div>
+          <button class="danger-btn" onclick="logoutAdmin()">Logout</button>
+        </div>
+
+        
+        <div class="notice-admin-box glass-panel">
+          <div>
+            <h3>Important Notice Bar</h3>
+            <p>This message appears below the logo/header and moves from right to left.</p>
+          </div>
+          <textarea id="noticeTextInput" rows="3" placeholder="Important notice text..."></textarea>
+          <div class="notice-admin-actions">
+            <button class="primary-btn" onclick="saveImportantNotice()">Save / Update Notice</button>
+            <button class="danger-btn" onclick="deleteImportantNotice()">Delete Notice</button>
+          </div>
+        </div>
+
+
+        
+        <div class="tools-admin-box glass-panel">
+          <div>
+            <h3>AI Tools Manager</h3>
+            <p>Add the websites/tools where users can create AI images. These links appear below the stats containers.</p>
+          </div>
+          <div class="tools-admin-grid">
+            <input id="toolNameInput" type="text" placeholder="Tool name e.g. ChatGPT Image" />
+            <input id="toolIconInput" type="text" placeholder="Icon / emoji e.g. ✨ or 🤖" />
+            <input id="toolUrlInput" type="url" placeholder="Tool URL e.g. https://chatgpt.com" />
+          </div>
+          <button id="toolSaveBtn" class="primary-btn full-btn" onclick="saveAiTool()">Save Tool</button>
+          <div id="toolsAdminList" class="tools-admin-list"></div>
+        </div>
+
+
+        <div class="admin-form glass-panel admin-entry-form">
+          <input id="itemTitle" type="text" placeholder="Container title" />
+          <select id="itemCategory">
+            <option value="">Select Prompt Type</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+          <textarea id="itemPrompt" rows="7" placeholder="Full AI prompt..."></textarea>
+          <input id="itemImages" type="file" accept="image/*" multiple />
+          <button id="saveBtn" class="primary-btn full-btn" onclick="savePromptItem()">Save Container</button>
+        </div>
+
+        <div id="adminList" class="admin-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+
+  <a class="floating-instagram" href="https://www.instagram.com/nexaprom.ai" target="_blank" rel="noopener" aria-label="Open NexaProm Instagram">
+    <span class="ig-ring"></span>
+    <svg class="ig-svg" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7.8 2h8.4A5.81 5.81 0 0 1 22 7.8v8.4a5.81 5.81 0 0 1-5.8 5.8H7.8A5.81 5.81 0 0 1 2 16.2V7.8A5.81 5.81 0 0 1 7.8 2Zm0 2A3.8 3.8 0 0 0 4 7.8v8.4A3.8 3.8 0 0 0 7.8 20h8.4a3.8 3.8 0 0 0 3.8-3.8V7.8A3.8 3.8 0 0 0 16.2 4H7.8Zm4.2 3.25A4.75 4.75 0 1 1 7.25 12 4.75 4.75 0 0 1 12 7.25Zm0 2A2.75 2.75 0 1 0 14.75 12 2.75 2.75 0 0 0 12 9.25Zm5.15-2.55a1.15 1.15 0 1 1-1.15 1.15 1.15 1.15 0 0 1 1.15-1.15Z"/>
+    </svg>
+  </a>
+
+</body>
+</html>
