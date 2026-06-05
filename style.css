@@ -1556,3 +1556,83 @@ button,input,textarea,select{font:inherit}
     font-size:12px;
   }
 }
+
+
+
+/* Floating right-side Instagram icon */
+.floating-instagram{
+  position:fixed;
+  right:18px;
+  top:50%;
+  transform:translateY(-50%);
+  width:58px;
+  height:58px;
+  border-radius:22px;
+  display:grid;
+  place-items:center;
+  z-index:75;
+  text-decoration:none;
+  background:
+    radial-gradient(circle at 28% 28%, rgba(255,209,102,.95), transparent 25%),
+    radial-gradient(circle at 74% 24%, rgba(255,76,162,.90), transparent 32%),
+    linear-gradient(135deg,#ff4ca2,#865dff 55%,#33d8ff);
+  box-shadow:
+    0 0 22px rgba(255,76,162,.55),
+    0 0 42px rgba(134,93,255,.34),
+    0 14px 38px rgba(0,0,0,.36);
+  border:1px solid rgba(255,255,255,.28);
+  overflow:hidden;
+  animation:instaFloat 2.4s ease-in-out infinite;
+}
+.floating-instagram::before{
+  content:"";
+  position:absolute;
+  inset:-42%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.48),transparent);
+  transform:rotate(24deg) translateX(-90%);
+  animation:instaShine 2.9s ease-in-out infinite;
+}
+.ig-ring{
+  position:absolute;
+  inset:7px;
+  border-radius:17px;
+  border:1px solid rgba(255,255,255,.45);
+  box-shadow:inset 0 0 14px rgba(255,255,255,.18);
+}
+.ig-svg{
+  width:31px;
+  height:31px;
+  fill:#fff;
+  position:relative;
+  z-index:2;
+  filter:drop-shadow(0 2px 8px rgba(0,0,0,.28));
+}
+.floating-instagram:hover{
+  transform:translateY(-50%) scale(1.08) rotate(3deg);
+}
+@keyframes instaFloat{
+  0%,100%{translate:0 0; filter:brightness(1)}
+  50%{translate:0 -7px; filter:brightness(1.18)}
+}
+@keyframes instaShine{
+  0%{transform:rotate(24deg) translateX(-120%)}
+  45%,100%{transform:rotate(24deg) translateX(120%)}
+}
+@media(max-width:780px){
+  .floating-instagram{
+    width:48px;
+    height:48px;
+    right:12px;
+    top:auto;
+    bottom:92px;
+    border-radius:18px;
+  }
+  .ig-ring{
+    inset:6px;
+    border-radius:14px;
+  }
+  .ig-svg{
+    width:26px;
+    height:26px;
+  }
+}
