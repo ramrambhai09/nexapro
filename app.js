@@ -20,6 +20,8 @@ let lastScrollY = 0;
 const ITEMS_PER_PAGE = 10;
 let currentPage = 1;
 let lastFilterValue = 'All';
+let pendingSharedCardId = null;
+let isFocusingSharedCard = false;
 
 const fallbackHeroSlides = [
   { title: '3D Portrait Style', image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=80' },
@@ -829,6 +831,10 @@ function renderGallery(resetPage = false) {
 
   renderPagination(filtered.length, totalPages);
 
+  if (!isFocusingSharedCard && (pendingSharedCardId || getSharedCardIdFromUrl())) {
+    setTimeout(focusSharedCardIfNeeded, 80);
+  }
+
   document.getElementById('totalCards').textContent = itemsCache.length;
   document.getElementById('totalImages').textContent = itemsCache.reduce((sum, item) => sum + (item.images?.length || 0), 0);
   document.getElementById('totalCategories').textContent = new Set(itemsCache.map(item => item.category).filter(cat => cat === 'Male' || cat === 'Female')).size;
@@ -910,25 +916,78 @@ async function copyPrompt(prompt, button) {
   }
 }
 
+
 async function sharePrompt(id) {
   const item = itemsCache.find(entry => String(entry.id) === String(id));
   if (!item) return;
-  const shareText = `${item.title}\n\n${item.prompt}`;
+
+  const shareUrl = `${window.location.origin}${window.location.pathname}?card=${encodeURIComponent(id)}`;
+  const shareText = `${item.title}\n\nOpen this prompt container:\n${shareUrl}`;
 
   if (navigator.share) {
     try {
-      await navigator.share({ title: item.title, text: shareText });
+      await navigator.share({
+        title: item.title,
+        text: shareText,
+        url: shareUrl
+      });
       return;
     } catch (_) {}
   }
 
   try {
-    await navigator.clipboard.writeText(shareText);
+    await navigator.clipboard.writeText(shareUrl);
     showCopyAnimation(null);
-    showToast('Prompt details copied for sharing');
+    showToast('Container link copied');
   } catch {
     showToast('Share failed');
   }
+}
+
+function getSharedCardIdFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('card');
+}
+
+function focusSharedCardIfNeeded() {
+  if (isFocusingSharedCard) return;
+
+  const sharedId = pendingSharedCardId || getSharedCardIdFromUrl();
+  if (!sharedId || !itemsCache.length) return;
+
+  const sharedIndex = itemsCache.findIndex(item => String(item.id) === String(sharedId));
+  if (sharedIndex === -1) return;
+
+  isFocusingSharedCard = true;
+
+  const categoryFilter = document.getElementById('categoryFilter');
+  const searchInput = document.getElementById('searchInput');
+
+  if (categoryFilter) categoryFilter.value = 'All';
+  if (searchInput) searchInput.value = '';
+
+  currentPage = Math.floor(sharedIndex / ITEMS_PER_PAGE) + 1;
+  pendingSharedCardId = sharedId;
+
+  renderGallery(false);
+
+  setTimeout(() => {
+    const card = document.querySelector(`[data-card-id="${CSS.escape(sharedId)}"]`);
+    if (!card) {
+      isFocusingSharedCard = false;
+      return;
+    }
+
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.add('shared-focus');
+
+    setTimeout(() => {
+      card.classList.remove('shared-focus');
+    }, 6500);
+
+    pendingSharedCardId = null;
+    isFocusingSharedCard = false;
+  }, 280);
 }
 
 function openAdminModal() {
