@@ -11,6 +11,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let itemsCache = [];
 let categoriesCache = ['Male', 'Female'];
 let editingCategoryName = null;
+let promptCategoriesSubscribed = false;
 let editingId = null;
 let editingToolId = null;
 let toolsCache = [];
@@ -769,6 +770,7 @@ async function fetchItems() {
   }
 
   startHeroSlider();
+  await fetchPromptCategories();
   renderGallery();
 }
 
@@ -849,12 +851,14 @@ async function savePromptCategory() {
       const {error}=await supabaseClient.from(CATEGORIES_TABLE).update({name,updated_at:new Date().toISOString()}).eq('name',editingCategoryName);
       if(error) throw error; showToast('Category updated');
     }else{
-      const {error}=await supabaseClient.from(CATEGORIES_TABLE).insert({name});
+      const {error}=await supabaseClient.from(CATEGORIES_TABLE).upsert({name}, { onConflict: 'name' });
       if(error) throw error; showToast('Category added');
     }
     editingCategoryName=null; if(input) input.value='';
     const btn=document.getElementById('categorySaveBtn'); if(btn) btn.textContent='Save Category';
     await fetchPromptCategories();
+    const itemSelect = document.getElementById('itemCategory');
+    if (itemSelect) itemSelect.value = name;
   }catch(error){console.error(error);showToast(error.message||'Category save failed');}
 }
 function editPromptCategory(name){
@@ -884,8 +888,16 @@ function renderCategoryAdminList(){
   list.innerHTML=categories.map(cat=>`<div class="category-admin-item"><b>${escapeHtml(cat)}</b>${cat==='Male'||cat==='Female'?'':`<button type="button" title="Edit" onclick="editPromptCategory('${escapeHtml(cat)}')">✎</button><button type="button" title="Delete" onclick="deletePromptCategory('${escapeHtml(cat)}')">×</button>`}</div>`).join('');
 }
 function subscribePromptCategories(){
-  try{ supabaseClient.channel('prompt_categories_live').on('postgres_changes',{event:'*',schema:'public',table:CATEGORIES_TABLE},()=>fetchPromptCategories()).subscribe(); }
-  catch(error){console.warn('Categories subscription failed:',error);}
+  if (promptCategoriesSubscribed) return;
+  promptCategoriesSubscribed = true;
+  try{
+    supabaseClient
+      .channel('prompt_categories_live')
+      .on('postgres_changes',{event:'*',schema:'public',table:CATEGORIES_TABLE},()=>fetchPromptCategories())
+      .subscribe();
+  } catch(error){
+    console.warn('Categories subscription failed:',error);
+  }
 }
 
 function renderGallery(resetPage = false) {
@@ -1187,9 +1199,7 @@ async function savePromptItem() {
 
     clearForm();
     await fetchItems();
-fetchPromptCategories();
-subscribePromptCategories();
-
+    await fetchPromptCategories();
     renderAdminList();
   } catch (error) {
     console.error(error);
@@ -1259,6 +1269,7 @@ setupHideTopbarOnScroll();
 setupNexaPromInstallButton();
 setupScrollDubSound();
 fetchItems();
+subscribePromptCategories();
 startLiveVisitCounter();
 fetchImportantNotice();
 subscribeImportantNotice();
