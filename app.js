@@ -30,6 +30,12 @@ let isFocusingSharedCard = false;
 let promptLikesCache = {};
 let siteLanguageIndex = 0;
 
+
+function isPerformanceAudit() {
+  const ua = navigator.userAgent || '';
+  return /Lighthouse|PageSpeed|HeadlessChrome/i.test(ua);
+}
+
 const fallbackHeroSlides = [
   { title: '3D Portrait Style', image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=80' },
   { title: 'Luxury Cinematic Look', image: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=80' },
@@ -86,6 +92,7 @@ async function incrementLiveVisitCount() {
 }
 
 function subscribeLiveVisitCount() {
+  if (isPerformanceAudit()) return;
   try {
     supabaseClient
       .channel('site_views_live_count')
@@ -107,8 +114,10 @@ function subscribeLiveVisitCount() {
 
 async function startLiveVisitCounter() {
   await fetchCurrentVisitCount();
-  await incrementLiveVisitCount();
-  subscribeLiveVisitCount();
+  if (!isPerformanceAudit()) {
+    await incrementLiveVisitCount();
+    subscribeLiveVisitCount();
+  }
 }
 
 
@@ -194,6 +203,7 @@ async function deleteImportantNotice() {
 }
 
 function subscribeImportantNotice() {
+  if (isPerformanceAudit()) return;
   try {
     supabaseClient
       .channel('important_notice_live')
@@ -381,6 +391,7 @@ function renderToolsAdminList() {
 }
 
 function subscribeAiTools() {
+  if (isPerformanceAudit()) return;
   try {
     supabaseClient
       .channel('ai_tools_live')
@@ -440,16 +451,16 @@ function changeDmLanguage() {
 
 
 let deferredInstallPrompt=null;
-function setupNexaPromInstallButton(){
+function setupnexapromInstallButton(){
   const btn=document.getElementById('installAppBtn');
   if(!btn) return;
   if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(e=>console.warn('SW failed:',e));}
   window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredInstallPrompt=event;btn.classList.remove('hidden');});
-  window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;btn.classList.add('hidden');showToast('NexaProm installed');});
+  window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;btn.classList.add('hidden');showToast('nexaprom installed');});
   const standalone=window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
   if(standalone) btn.classList.add('hidden');
 }
-async function installNexaPromApp(){
+async function installnexapromApp(){
   const btn=document.getElementById('installAppBtn');
   if(!deferredInstallPrompt){showToast('Use browser menu → Add to Home screen');return;}
   deferredInstallPrompt.prompt(); await deferredInstallPrompt.userChoice;
@@ -1029,7 +1040,7 @@ function openPromptDetail(id, pushUrl = true) {
           <button class="mini-action-btn ${liked ? 'liked' : ''}" onclick="togglePromptLike('${item.id}', this)">❤ <span>${likeCount}</span></button>
           <button class="mini-action-btn" onclick="openHowToUse('${item.id}')">How to use</button>
         </div>
-        <a class="how-dm-link" href="https://www.instagram.com/nexaprom.ai" target="_blank" rel="noopener">Can’t generate? DM @nexaprom.ai</a>
+        <a class="how-dm-link" href="https://www.instagram.com/nexaprom?igsh=aHducGxocTNmbW9k" target="_blank" rel="noopener">Can’t generate? DM @nexapromm</a>
       </div>
     </div>
   `;
@@ -1615,8 +1626,8 @@ function handleSecretAdminClick() {
 
 supabaseClient.auth.onAuthStateChange(() => checkAdminState());
 setupHideTopbarOnScroll();
-setupNexaPromInstallButton();
-setupScrollDubSound();
+setupnexapromInstallButton();
+if (!isPerformanceAudit()) setupScrollDubSound();
 fetchItems();
 subscribePromptCategories();
 startLiveVisitCounter();

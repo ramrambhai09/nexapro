@@ -1,15 +1,15 @@
 {
-  "name": "NexaProm - AI Prompt Gallery",
-  "short_name": "NexaProm",
+  "name": "nexaprom - AI Prompt Gallery",
+  "short_name": "nexaprom",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#080914",
   "theme_color": "#865dff",
-  "description": "Premium AI photo prompt gallery for viral image prompts.",
+  "description": "nexaprom premium AI photo prompt gallery for viral image prompts.",
   "icons": [
     {
-      "src": "favicon.svg",
+      "src": "/favicon.svg",
       "sizes": "128x128",
       "type": "image/svg+xml",
       "purpose": "any maskable"

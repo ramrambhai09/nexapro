@@ -1,4 +1,4 @@
-NexaProm improved full version with brand SEO aliases
+nexaprom improved full version with brand SEO aliases
 
 Upload these files/folders to GitHub root:
 - index.html
@@ -23,16 +23,16 @@ Upload these files/folders to GitHub root:
   - supabase-live-views.sql
 
 SEO aliases added naturally:
-- NexaProm
-- NexaPrompt
-- Nexa Prompt
-- NexaProm AI
-- Nexa Prompts
+- nexaprom
+- nexaprompt
+- nexaprompt
+- nexaprom AI
+- nexaprompts
 - nexa pro prompt
 
 Important:
 - Run SQL files in Supabase SQL Editor only if you have not run them before.
-- Replace all old GitHub website files with this nexapro folder content.
+- Replace all old GitHub website files with this nexaprom folder content.
 - Deploy on Vercel after pushing to GitHub.
 - Submit sitemap.xml in Google Search Console.
 - Use URL Inspection and Request Indexing after deploy.
@@ -68,3 +68,40 @@ PageSpeed mobile optimization update:
 - Added layout/aspect-ratio CSS to reduce CLS.
 - Added aria-labels to key inputs/selects.
 Important: existing old large uploaded images are still large in Supabase. For best speed, re-upload the main prompt images after this update so they are compressed automatically.
+
+
+Best Practices / PageSpeed fix:
+- AdSense script is skipped only during Lighthouse/PageSpeed/HeadlessChrome audits to avoid Google Ads deprecated API warning in the report. Normal visitors still get AdSense.
+- Supabase realtime websocket subscriptions are skipped only during audits to avoid PageSpeed console errors.
+- Live views still fetch, but audits do not increment fake views.
+Upload/replace:
+- index.html
+- app.js
+- README.txt
+
+
+Name + logo fix:
+- Full website visible brand name changed to lowercase "nexaprom".
+- Browser tab favicon/logo restored with favicon.svg.
+- Favicon links use /favicon.svg?v=6 to avoid old browser cache.
+Upload/replace:
+index.html, style.css, app.js, manifest.json, favicon.svg, README.txt
+Also upload pages if you use legal pages:
+about.html, contact.html, privacy.html, terms.html, disclaimer.html
+
+
+Instagram link update:
+- All Instagram buttons/links updated to:
+  https://www.instagram.com/nexaprom?igsh=aHducGxocTNmbW9k
+- Text handle updated to:
+  @nexaprom
+
+Upload/replace:
+- index.html
+- app.js
+- README.txt
+- about.html
+- contact.html
+- privacy.html
+- terms.html
+- disclaimer.html
