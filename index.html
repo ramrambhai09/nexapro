@@ -8,6 +8,10 @@
   <meta name="robots" content="index, follow">
   <meta name="author" content="NexaProm">
   <meta name="theme-color" content="#080914">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="shortcut icon" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/favicon.svg">
+
   <link rel="canonical" href="https://nexaprom.vercel.app/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="NexaProm">
@@ -79,7 +83,8 @@
     </div>
 
     <nav class="topnav">
-      <button class="nav-btn" onclick="scrollToSection('gallery')">Gallery</button>
+      <button class="lang-toggle-site" id="siteLanguageBtn" type="button" onclick="changeSiteLanguage()">English</button>
+        <button class="nav-btn" onclick="scrollToSection('gallery')">Gallery</button>
       <button class="nav-btn" onclick="scrollToSection('how')">How It Works</button>
     </nav>
   </header>
@@ -162,6 +167,9 @@
       </div>
 
       
+
+      <div id="trendingStrip" class="trending-strip hidden"></div>
+
       <div class="seo-keyword-box glass-panel">
         <h3>Trending AI Photo Prompt Categories</h3>
         <p>
@@ -240,6 +248,27 @@
 
   <div id="toast" class="toast">Copied!</div>
 
+
+  <div id="promptDetailModal" class="modal hidden">
+    <div class="modal-backdrop" onclick="closePromptDetail()"></div>
+    <div class="detail-box" id="promptDetailContent"></div>
+  </div>
+
+  <div id="howUseModal" class="modal hidden">
+    <div class="modal-backdrop" onclick="closeHowToUse()"></div>
+    <div class="how-box">
+      <button class="close-btn" onclick="closeHowToUse()">×</button>
+      <span class="feature-kicker">How to use</span>
+      <h2 id="howUseTitle">Create this style in 3 simple steps</h2>
+      <div class="how-steps">
+        <div><strong>01</strong><b>Upload your photo</b><p>Open your favorite AI image tool and upload a clear face/photo.</p></div>
+        <div><strong>02</strong><b>Copy the prompt</b><p>Tap Copy Prompt from the card and paste it in the tool.</p></div>
+        <div><strong>03</strong><b>Generate & adjust</b><p>Generate the image. If needed, change outfit, color, background, or name text.</p></div>
+      </div>
+      <a class="how-dm-link" href="https://www.instagram.com/nexaprom.ai" target="_blank" rel="noopener">Need help? DM @nexaprom.ai</a>
+    </div>
+  </div>
+
   <div id="adminModal" class="modal hidden">
     <div class="modal-backdrop" onclick="closeAdminModal()"></div>
     <div class="admin-box">
@@ -312,6 +341,7 @@
             <option value="Male">Male</option>
             <option value="Female">Female</option>
           </select>
+          <label class="admin-check"><input id="itemTrending" type="checkbox" /> Mark as Trending</label>
           <textarea id="itemPrompt" rows="7" placeholder="Full AI prompt..."></textarea>
           <input id="itemImages" type="file" accept="image/*" multiple />
           <button id="saveBtn" class="primary-btn full-btn" onclick="savePromptItem()">Save Container</button>

@@ -5,6 +5,7 @@ const TABLE_NAME = 'prompt_cards';
 const CATEGORIES_TABLE = 'prompt_categories';
 const NOTICE_TABLE = 'important_notice';
 const TOOLS_TABLE = 'ai_tools';
+const LIKES_TABLE = 'prompt_likes';
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -26,6 +27,8 @@ let currentPage = 1;
 let lastFilterValue = 'All';
 let pendingSharedCardId = null;
 let isFocusingSharedCard = false;
+let promptLikesCache = {};
+let siteLanguageIndex = 0;
 
 const fallbackHeroSlides = [
   { title: '3D Portrait Style', image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=80' },
@@ -302,6 +305,7 @@ async function saveAiTool() {
 
     clearToolForm();
     await fetchAiTools();
+fetchPromptLikes();
   } catch (error) {
     console.error(error);
     showToast(error.message || 'Tool save failed');
@@ -655,7 +659,12 @@ function safeName(str = 'file') {
 }
 
 function normalizeRow(row) {
-  return { ...row, images: Array.isArray(row.images) ? row.images : [], current: 0 };
+  return {
+    ...row,
+    images: Array.isArray(row.images) ? row.images : [],
+    current: 0,
+    trending: Boolean(row.trending)
+  };
 }
 
 
@@ -829,6 +838,242 @@ function updateCategoryFilter(items) {
   renderCategoryPills();
 }
 
+
+function slugifyText(text) {
+  return String(text || '')
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 70) || 'prompt';
+}
+
+function getItemSlug(item) {
+  return `${slugifyText(item.title)}-${item.id}`;
+}
+
+function getIdFromSlug(slug) {
+  if (!slug) return null;
+  const parts = String(slug).split('-');
+  return parts[parts.length - 1];
+}
+
+function getPromptParam() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('prompt');
+}
+
+function getLikedPromptIds() {
+  try {
+    return JSON.parse(localStorage.getItem('nexaprom_liked_prompts') || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function setLikedPromptIds(ids) {
+  localStorage.setItem('nexaprom_liked_prompts', JSON.stringify([...new Set(ids)]));
+}
+
+function isPromptLiked(id) {
+  return getLikedPromptIds().includes(String(id));
+}
+
+async function fetchPromptLikes() {
+  try {
+    const { data, error } = await supabaseClient
+      .from(LIKES_TABLE)
+      .select('prompt_id, like_count');
+
+    if (error) throw error;
+    promptLikesCache = {};
+    (data || []).forEach(row => {
+      promptLikesCache[String(row.prompt_id)] = row.like_count || 0;
+    });
+    renderGallery(false);
+  } catch (error) {
+    console.warn('Likes fetch failed:', error);
+  }
+}
+
+async function togglePromptLike(id, btn) {
+  const likedIds = getLikedPromptIds();
+  const idText = String(id);
+  const alreadyLiked = likedIds.includes(idText);
+
+  let nextLikedIds;
+  let delta;
+  if (alreadyLiked) {
+    nextLikedIds = likedIds.filter(item => item !== idText);
+    delta = -1;
+  } else {
+    nextLikedIds = [...likedIds, idText];
+    delta = 1;
+  }
+
+  setLikedPromptIds(nextLikedIds);
+  promptLikesCache[idText] = Math.max(0, (promptLikesCache[idText] || 0) + delta);
+  if (btn) {
+    btn.classList.toggle('liked', !alreadyLiked);
+    btn.querySelector('span').textContent = promptLikesCache[idText] || 0;
+  }
+
+  try {
+    const { data } = await supabaseClient
+      .from(LIKES_TABLE)
+      .select('prompt_id, like_count')
+      .eq('prompt_id', idText)
+      .maybeSingle();
+
+    if (data) {
+      await supabaseClient
+        .from(LIKES_TABLE)
+        .update({ like_count: Math.max(0, (data.like_count || 0) + delta), updated_at: new Date().toISOString() })
+        .eq('prompt_id', idText);
+    } else if (delta > 0) {
+      await supabaseClient
+        .from(LIKES_TABLE)
+        .insert({ prompt_id: idText, like_count: 1 });
+    }
+  } catch (error) {
+    console.warn('Like sync failed:', error);
+  }
+}
+
+function openHowToUse(id) {
+  const item = itemsCache.find(entry => String(entry.id) === String(id));
+  const modal = document.getElementById('howUseModal');
+  const title = document.getElementById('howUseTitle');
+  if (title && item) title.textContent = `Create “${item.title}” in 3 simple steps`;
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeHowToUse() {
+  document.getElementById('howUseModal')?.classList.add('hidden');
+}
+
+function openPromptDetail(id, pushUrl = true) {
+  const item = itemsCache.find(entry => String(entry.id) === String(id));
+  if (!item) return;
+
+  const modal = document.getElementById('promptDetailModal');
+  const content = document.getElementById('promptDetailContent');
+  const img = item.images?.[0] || '';
+  const likeCount = promptLikesCache[String(item.id)] || 0;
+  const liked = isPromptLiked(item.id);
+
+  content.innerHTML = `
+    <button class="close-btn" onclick="closePromptDetail()">×</button>
+    <div class="detail-grid">
+      <div class="detail-image-wrap">
+        ${img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(item.title)}" />` : `<div class="empty-card"><strong>No image</strong></div>`}
+        ${item.trending ? `<span class="trending-badge detail-trending">🔥 Trending</span>` : ''}
+      </div>
+      <div class="detail-content">
+        <span class="feature-kicker">${escapeHtml(item.category || 'Prompt')}</span>
+        <h1>${escapeHtml(item.title)}</h1>
+        <p class="detail-intro">Copy this AI photo prompt, use your own image, and recreate a similar style in your favorite AI image generator.</p>
+        <div class="detail-prompt">${escapeHtml(item.prompt)}</div>
+        <div class="detail-actions">
+          <button class="copy-btn" onclick='copyPrompt(${JSON.stringify(item.prompt)}, this)'>Copy Prompt</button>
+          <button class="share-btn" onclick="sharePrompt('${item.id}')">Share Link</button>
+          <button class="mini-action-btn ${liked ? 'liked' : ''}" onclick="togglePromptLike('${item.id}', this)">❤ <span>${likeCount}</span></button>
+          <button class="mini-action-btn" onclick="openHowToUse('${item.id}')">How to use</button>
+        </div>
+        <a class="how-dm-link" href="https://www.instagram.com/nexaprom.ai" target="_blank" rel="noopener">Can’t generate? DM @nexaprom.ai</a>
+      </div>
+    </div>
+  `;
+
+  modal.classList.remove('hidden');
+
+  if (pushUrl) {
+    const url = `${window.location.origin}${window.location.pathname}?prompt=${encodeURIComponent(getItemSlug(item))}`;
+    history.pushState({ prompt: item.id }, '', url);
+  }
+}
+
+function closePromptDetail() {
+  document.getElementById('promptDetailModal')?.classList.add('hidden');
+  if (window.location.search.includes('prompt=')) {
+    history.pushState({}, '', `${window.location.origin}${window.location.pathname}`);
+  }
+}
+
+function openPromptFromUrl() {
+  const slug = getPromptParam();
+  if (!slug || !itemsCache.length) return;
+  const id = getIdFromSlug(slug);
+  const item = itemsCache.find(entry => String(entry.id) === String(id));
+  if (item) {
+    openPromptDetail(item.id, false);
+  }
+}
+
+function renderTrendingStrip() {
+  const wrap = document.getElementById('trendingStrip');
+  if (!wrap) return;
+  const trending = itemsCache.filter(item => item.trending).slice(0, 10);
+  if (!trending.length) {
+    wrap.classList.add('hidden');
+    wrap.innerHTML = '';
+    return;
+  }
+  wrap.classList.remove('hidden');
+  wrap.innerHTML = `
+    <div class="trending-title">🔥 Trending Prompts</div>
+    <div class="trending-pills">
+      ${trending.map(item => `<button onclick="openPromptDetail('${item.id}')">${escapeHtml(item.title)}</button>`).join('')}
+    </div>
+  `;
+}
+
+const siteLanguages = [
+  {
+    button: 'English',
+    hero: 'Create stunning AI images from premium prompts',
+    heroText: 'Browse premium prompt containers, preview style images, copy the prompt instantly, and recreate the same look using your own photo in any AI image tool.',
+    gallery: 'Choose your AI photo prompt category',
+    tools: 'Create images with these AI tools'
+  },
+  {
+    button: 'हिंदी',
+    hero: 'Premium prompts से शानदार AI images बनाएं',
+    heroText: 'Prompt containers देखें, style images preview करें, prompt copy करें और अपनी photo से similar look बनाएं.',
+    gallery: 'अपनी AI photo prompt category चुनें',
+    tools: 'इन AI tools से images बनाएं'
+  },
+  {
+    button: 'ગુજરાતી',
+    hero: 'Premium prompts થી stunning AI images બનાવો',
+    heroText: 'Prompt containers browse કરો, style images preview કરો, prompt copy કરો અને તમારા photo થી same look બનાવો.',
+    gallery: 'તમારી AI photo prompt category પસંદ કરો',
+    tools: 'આ AI tools થી images બનાવો'
+  }
+];
+
+function changeSiteLanguage() {
+  siteLanguageIndex = (siteLanguageIndex + 1) % siteLanguages.length;
+  const lang = siteLanguages[siteLanguageIndex];
+  const btn = document.getElementById('siteLanguageBtn');
+  if (btn) btn.textContent = lang.button;
+
+  const heroTitle = document.querySelector('.hero-copy h2');
+  const heroText = document.querySelector('.hero-text');
+  const galleryTitle = document.querySelector('#gallery .section-title h2');
+  const toolsTitle = document.querySelector('#toolsSection .tools-head h2');
+
+  if (heroTitle) heroTitle.textContent = lang.hero;
+  if (heroText) heroText.textContent = lang.heroText;
+  if (galleryTitle) galleryTitle.textContent = lang.gallery;
+  if (toolsTitle) toolsTitle.textContent = lang.tools;
+
+  document.body.classList.remove('lang-swap');
+  void document.body.offsetWidth;
+  document.body.classList.add('lang-swap');
+}
+
 function cardTemplate(item) {
   const currentIndex = item.current || 0;
   const currentImage = item.images?.[currentIndex] || '';
@@ -983,6 +1228,7 @@ function renderGallery(resetPage = false) {
   }
 
   renderPagination(filtered.length, totalPages);
+  renderTrendingStrip();
 
   if (!isFocusingSharedCard && (pendingSharedCardId || getSharedCardIdFromUrl())) {
     setTimeout(focusSharedCardIfNeeded, 80);
@@ -990,7 +1236,7 @@ function renderGallery(resetPage = false) {
 
   document.getElementById('totalCards').textContent = itemsCache.length;
   document.getElementById('totalImages').textContent = itemsCache.reduce((sum, item) => sum + (item.images?.length || 0), 0);
-  document.getElementById('totalCategories').textContent = new Set(itemsCache.map(item => item.category).filter(cat => cat === 'Male' || cat === 'Female')).size;
+  document.getElementById('totalCategories').textContent = getAllPromptCategories().filter(cat => cat !== 'All').length;
 }
 
 function renderPagination(totalItems, totalPages) {
@@ -1074,7 +1320,7 @@ async function sharePrompt(id) {
   const item = itemsCache.find(entry => String(entry.id) === String(id));
   if (!item) return;
 
-  const shareUrl = `${window.location.origin}${window.location.pathname}?card=${encodeURIComponent(id)}`;
+  const shareUrl = `${window.location.origin}${window.location.pathname}?prompt=${encodeURIComponent(getItemSlug(item))}`;
   const shareText = `${item.title}\n\nOpen this prompt container:\n${shareUrl}`;
 
   if (navigator.share) {
@@ -1091,7 +1337,7 @@ async function sharePrompt(id) {
   try {
     await navigator.clipboard.writeText(shareUrl);
     showCopyAnimation(null);
-    showToast('Container link copied');
+    showToast('Prompt detail link copied');
   } catch {
     showToast('Share failed');
   }
@@ -1192,6 +1438,8 @@ function clearForm() {
   document.getElementById('itemCategory').value = '';
   document.getElementById('itemPrompt').value = '';
   document.getElementById('itemImages').value = '';
+  const trendingInput = document.getElementById('itemTrending');
+  if (trendingInput) trendingInput.checked = false;
   document.getElementById('saveBtn').textContent = 'Save Container';
 }
 
@@ -1212,6 +1460,7 @@ async function savePromptItem() {
   const title = document.getElementById('itemTitle').value.trim();
   const category = document.getElementById('itemCategory').value.trim();
   const prompt = document.getElementById('itemPrompt').value.trim();
+  const trending = document.getElementById('itemTrending')?.checked || false;
   const imageFiles = Array.from(document.getElementById('itemImages').files || []);
 
   if (!title || !category || !prompt) {
@@ -1229,6 +1478,7 @@ async function savePromptItem() {
         title,
         category,
         prompt,
+        trending,
         images: imageUrls.length ? imageUrls : (existing?.images || []),
         updated_at: new Date().toISOString()
       };
@@ -1236,7 +1486,7 @@ async function savePromptItem() {
       if (error) throw error;
       showToast('Container updated');
     } else {
-      const payload = { title, category, prompt, images: imageUrls };
+      const payload = { title, category, prompt, trending, images: imageUrls };
       const { error } = await supabaseClient.from(TABLE_NAME).insert(payload);
       if (error) throw error;
       showToast('Container saved');
@@ -1263,7 +1513,7 @@ function renderAdminList() {
     <div class="admin-item">
       <div>
         <h4>${escapeHtml(item.title)}</h4>
-        <p>${escapeHtml(item.category)} • ${item.images?.length || 0} image(s)</p>
+        <p>${escapeHtml(item.category)} • ${item.images?.length || 0} image(s) ${item.trending ? '• 🔥 Trending' : ''}</p>
       </div>
       <div class="admin-actions">
         <button class="edit-btn" onclick="editItem('${item.id}')">Edit</button>
@@ -1280,6 +1530,8 @@ function editItem(id) {
   document.getElementById('itemTitle').value = item.title || '';
   document.getElementById('itemCategory').value = item.category || '';
   document.getElementById('itemPrompt').value = item.prompt || '';
+  const trendingInput = document.getElementById('itemTrending');
+  if (trendingInput) trendingInput.checked = Boolean(item.trending);
   document.getElementById('itemImages').value = '';
   document.getElementById('saveBtn').textContent = 'Update Container';
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1331,3 +1583,5 @@ setInterval(() => {
   });
   if (changed) renderGallery();
 }, 4200);
+
+window.addEventListener('popstate', openPromptFromUrl);

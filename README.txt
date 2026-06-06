@@ -45,3 +45,15 @@ Loader fix update:
 - Loader hides after DOMContentLoaded and has a 3.5 second safety timeout.
 - This fixes the issue where loading stays forever on some phones/networks.
 - Upload loader.json with index.html, style.css and app.js.
+
+
+All features update:
+- Favicon link fixed. Keep favicon.svg in GitHub root.
+- Added prompt detail modal with SEO-friendly share URL: ?prompt=prompt-title-id
+- Added How to use popup on every prompt card.
+- Added like/heart button with Supabase prompt_likes table.
+- Added admin Trending checkbox and Trending Prompts strip.
+- Added full site language toggle: English → Hindi → Gujarati.
+- Run supabase-feature-update.sql once in Supabase SQL Editor.
+Upload/replace at least:
+index.html, style.css, app.js, favicon.svg, loader.json, supabase-feature-update.sql, README.txt
