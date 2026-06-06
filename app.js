@@ -452,6 +452,51 @@ async function installNexaPromApp(){
   deferredInstallPrompt=null; if(btn) btn.classList.add('hidden');
 }
 
+
+function hideSiteLoader() {
+  const loader = document.getElementById('siteLoader');
+  if (!loader) return;
+  loader.classList.add('hide');
+  setTimeout(() => loader.remove(), 500);
+}
+
+function initLottieLoader() {
+  const target = document.getElementById('lottieLoader');
+  if (!target) return;
+
+  if (window.lottie) {
+    try {
+      window.lottie.loadAnimation({
+        container: target,
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        path: 'loader.json'
+      });
+    } catch (error) {
+      console.warn('Lottie loader failed:', error);
+      target.innerHTML = '<div class="loader-fallback-logo">NX</div>';
+    }
+  } else {
+    target.innerHTML = '<div class="loader-fallback-logo">NX</div>';
+  }
+}
+
+/* Loader safety:
+   - Do not wait forever for images, ads, network, or slow scripts.
+   - Hide after DOM is ready.
+   - Force hide after 3.5 seconds even on bad network. */
+document.addEventListener('DOMContentLoaded', () => {
+  initLottieLoader();
+  setTimeout(hideSiteLoader, 900);
+});
+
+window.addEventListener('load', () => {
+  setTimeout(hideSiteLoader, 300);
+});
+
+setTimeout(hideSiteLoader, 3500);
+
 function scrollToSection(id) {
   const el = document.getElementById(id);
   if (el) el.scrollIntoView({ behavior: 'smooth' });

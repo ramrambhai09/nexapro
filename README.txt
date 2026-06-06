@@ -37,3 +37,11 @@ Important:
 - Submit sitemap.xml in Google Search Console.
 - Use URL Inspection and Request Indexing after deploy.
 - Ranking is not instant; keep adding original prompt cards with SEO-friendly titles.
+
+
+Loader fix update:
+- Added loader.json from uploaded Lottie animation.
+- Loading screen now uses Lottie animation.
+- Loader hides after DOMContentLoaded and has a 3.5 second safety timeout.
+- This fixes the issue where loading stays forever on some phones/networks.
+- Upload loader.json with index.html, style.css and app.js.
