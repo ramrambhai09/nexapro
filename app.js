@@ -778,7 +778,7 @@ function renderHeroSlide(index, firstLoad = false) {
 
   const slide = heroSlides[index];
   if (firstLoad || !heroImg.src) {
-    heroImg.src = slide.image;
+    heroImg.src = optimizedImageUrl(slide.image, 520, 70);
     heroTitle.textContent = slide.title;
     heroImg.classList.remove('flip-out');
     heroImg.classList.add('flip-in');
@@ -789,7 +789,7 @@ function renderHeroSlide(index, firstLoad = false) {
   heroImg.classList.add('flip-out');
 
   setTimeout(() => {
-    heroImg.src = slide.image;
+    heroImg.src = optimizedImageUrl(slide.image, 520, 70);
     heroTitle.textContent = slide.title;
     heroImg.classList.remove('flip-out');
     heroImg.classList.add('flip-in');
@@ -838,6 +838,54 @@ function updateCategoryFilter(items) {
   renderCategoryPills();
 }
 
+
+
+function optimizedImageUrl(url, width = 900, quality = 72) {
+  if (!url) return '';
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes('supabase.co') && u.pathname.includes('/storage/v1/object/public/')) {
+      u.pathname = u.pathname.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
+      u.searchParams.set('width', String(width));
+      u.searchParams.set('quality', String(quality));
+      u.searchParams.set('resize', 'contain');
+      return u.toString();
+    }
+    if (u.hostname.includes('images.unsplash.com')) {
+      u.searchParams.set('w', String(width));
+      u.searchParams.set('q', String(quality));
+      u.searchParams.set('auto', 'format');
+      u.searchParams.set('fit', 'crop');
+      return u.toString();
+    }
+  } catch (_) {}
+  return url;
+}
+
+async function compressImageFile(file, maxWidth = 1280, quality = 0.78) {
+  if (!file.type.startsWith('image/')) return file;
+
+  // Avoid recompressing small files.
+  if (file.size < 450 * 1024) return file;
+
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, maxWidth / bitmap.width);
+  const width = Math.round(bitmap.width * scale);
+  const height = Math.round(bitmap.height * scale);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d', { alpha: false });
+  ctx.drawImage(bitmap, 0, 0, width, height);
+
+  const blob = await new Promise(resolve => {
+    canvas.toBlob(resolve, 'image/webp', quality);
+  });
+
+  if (!blob) return file;
+  return new File([blob], safeName(file.name.replace(/\.[^.]+$/, '')) + '.webp', { type: 'image/webp' });
+}
 
 function slugifyText(text) {
   return String(text || '')
@@ -967,7 +1015,7 @@ function openPromptDetail(id, pushUrl = true) {
     <button class="close-btn" onclick="closePromptDetail()">×</button>
     <div class="detail-grid">
       <div class="detail-image-wrap">
-        ${img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(item.title)}" />` : `<div class="empty-card"><strong>No image</strong></div>`}
+        ${img ? `<img src="${escapeHtml(optimizedImageUrl(img, 900, 74))}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async" width="900" height="1200" />` : `<div class="empty-card"><strong>No image</strong></div>`}
         ${item.trending ? `<span class="trending-badge detail-trending">🔥 Trending</span>` : ''}
       </div>
       <div class="detail-content">
@@ -1088,7 +1136,7 @@ function cardTemplate(item) {
     <article class="prompt-card" data-card-id="${item.id}">
       <div class="image-box">
         <span class="cat-pill">${escapeHtml(item.category)}</span>
-        ${currentImage ? `<img src="${escapeHtml(currentImage)}" alt="${escapeHtml(item.title)}" loading="lazy" />` : `<div class="empty-card"><strong>No image</strong><span>Upload images from the admin panel.</span></div>`}
+        ${currentImage ? `<img src="${escapeHtml(optimizedImageUrl(currentImage, 760, 72))}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async" width="760" height="980" />` : `<div class="empty-card"><strong>No image</strong><span>Upload images from the admin panel.</span></div>`}
         ${swap}
       </div>
       <div class="card-body">
@@ -1446,9 +1494,13 @@ function clearForm() {
 async function uploadImages(files) {
   const uploadedUrls = [];
   for (const file of files) {
-    const ext = file.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}-${safeName(file.name.replace(/\.[^.]+$/, ''))}.${ext}`;
-    const { error } = await supabaseClient.storage.from(BUCKET_NAME).upload(fileName, file, { upsert: false });
+    const uploadFile = await compressImageFile(file);
+    const ext = uploadFile.name.split('.').pop() || 'webp';
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}-${safeName(uploadFile.name.replace(/\.[^.]+$/, ''))}.${ext}`;
+    const { error } = await supabaseClient.storage.from(BUCKET_NAME).upload(fileName, uploadFile, {
+      upsert: false,
+      cacheControl: '31536000'
+    });
     if (error) throw error;
     const { data } = supabaseClient.storage.from(BUCKET_NAME).getPublicUrl(fileName);
     uploadedUrls.push(data.publicUrl);

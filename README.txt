@@ -57,3 +57,14 @@ All features update:
 - Run supabase-feature-update.sql once in Supabase SQL Editor.
 Upload/replace at least:
 index.html, style.css, app.js, favicon.svg, loader.json, supabase-feature-update.sql, README.txt
+
+
+PageSpeed mobile optimization update:
+- Removed external Lottie/bodymovin script to reduce unused JavaScript.
+- Added width/height/decoding attributes to images.
+- Added Supabase image transformation URLs for displayed images when supported.
+- Added client-side image compression for future admin uploads (WebP, max 1280px).
+- Added cacheControl for new uploaded images.
+- Added layout/aspect-ratio CSS to reduce CLS.
+- Added aria-labels to key inputs/selects.
+Important: existing old large uploaded images are still large in Supabase. For best speed, re-upload the main prompt images after this update so they are compressed automatically.

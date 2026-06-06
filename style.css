@@ -2314,3 +2314,51 @@ button,input,textarea,select{font:inherit}
     max-height:180px;
   }
 }
+
+
+
+/* PageSpeed optimization: reserve image space and reduce layout shift */
+.phone-image-stage{
+  aspect-ratio:3 / 4;
+  min-height:320px;
+}
+.hero-preview-image{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.image-box{
+  aspect-ratio:4 / 5;
+  min-height:280px;
+}
+.image-box img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+.prompt-card{
+  contain:layout paint;
+}
+.detail-image-wrap{
+  aspect-ratio:3 / 4;
+}
+@media(max-width:780px){
+  .phone-image-stage{
+    min-height:250px;
+  }
+  .image-box{
+    min-height:250px;
+  }
+  .page-glow{
+    filter:blur(58px);
+  }
+}
+/* Reduce motion helps slow mobile audits and accessibility */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    scroll-behavior:auto !important;
+    transition-duration:.01ms !important;
+  }
+}

@@ -13,6 +13,8 @@
   <link rel="apple-touch-icon" href="/favicon.svg">
 
   <link rel="canonical" href="https://nexaprom.vercel.app/">
+  <link rel="preconnect" href="https://bizeppowtegiiarudswp.supabase.co">
+  <link rel="dns-prefetch" href="https://bizeppowtegiiarudswp.supabase.co">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="NexaProm">
   <meta property="og:title" content="NexaProm - AI Photo Prompt Gallery">
@@ -58,7 +60,6 @@
     "sameAs": ["https://www.instagram.com/nexaprom.ai"]
   }
   </script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
 </head>
 <body>
   <div id="siteLoader" class="site-loader" aria-label="Loading NexaProm">
@@ -136,7 +137,7 @@
         <div class="phone-shell tilt-card">
           <div class="phone-notch"></div>
           <div class="phone-image-stage">
-            <img id="heroPreviewImage" class="hero-preview-image" alt="Featured AI preview" src="" />
+            <img id="heroPreviewImage" class="hero-preview-image" alt="Featured AI preview" src="" width="420" height="560" decoding="async" fetchpriority="high" />
           </div>
           <div class="hero-overlay-title" id="heroPreviewTitle">Premium AI Portrait</div>
         </div>
@@ -180,8 +181,8 @@
       </div>
 
       <div class="toolbar glass-panel">
-        <input id="searchInput" type="text" placeholder="Search by title, category, or prompt..." oninput="renderGallery()" />
-        <select id="categoryFilter" onchange="renderGallery()">
+        <input id="searchInput" type="text" aria-label="Search prompts" placeholder="Search by title, category, or prompt..." oninput="renderGallery()" />
+        <select id="categoryFilter" aria-label="Filter prompts by category" onchange="renderGallery()">
           <option value="All">All Prompts</option>
           <option value="Male">Male</option>
           <option value="Female">Female</option>
@@ -278,8 +279,8 @@
         <h2>Admin Login</h2>
         <p>Upload, edit, update, and manage prompt containers from your creator panel.</p>
         <div class="admin-form">
-          <input id="adminEmail" type="email" placeholder="Admin Email" />
-          <input id="adminPass" type="password" placeholder="Password" />
+          <input id="adminEmail" type="email" aria-label="Admin email" placeholder="Admin Email" />
+          <input id="adminPass" type="password" aria-label="Admin password" placeholder="Password" />
           <button class="primary-btn full-btn" onclick="adminLogin()">Login</button>
           <small>Hidden access: click the nexapro brand 4 times.</small>
         </div>
@@ -300,7 +301,7 @@
             <h3>Important Notice Bar</h3>
             <p>This message appears below the logo/header and moves from right to left.</p>
           </div>
-          <textarea id="noticeTextInput" rows="3" placeholder="Important notice text..."></textarea>
+          <textarea id="noticeTextInput" rows="3" aria-label="Important notice text" placeholder="Important notice text..."></textarea>
           <div class="notice-admin-actions">
             <button class="primary-btn" onclick="saveImportantNotice()">Save / Update Notice</button>
             <button class="danger-btn" onclick="deleteImportantNotice()">Delete Notice</button>
@@ -316,8 +317,8 @@
           </div>
           <div class="tools-admin-grid">
             <input id="toolNameInput" type="text" placeholder="Tool name e.g. ChatGPT Image" />
-            <input id="toolIconInput" type="text" placeholder="Icon / emoji e.g. ✨ or 🤖" />
-            <input id="toolUrlInput" type="url" placeholder="Tool URL e.g. https://chatgpt.com" />
+            <input id="toolIconInput" type="text" aria-label="AI tool icon" placeholder="Icon / emoji e.g. ✨ or 🤖" />
+            <input id="toolUrlInput" type="url" aria-label="AI tool URL" placeholder="Tool URL e.g. https://chatgpt.com" />
           </div>
           <button id="toolSaveBtn" class="primary-btn full-btn" onclick="saveAiTool()">Save Tool</button>
           <div id="toolsAdminList" class="tools-admin-list"></div>
@@ -327,7 +328,7 @@
                 <div class="category-admin-box glass-panel">
           <div><h3>Category Manager</h3><p>Add categories for prompt containers. New categories will appear in the glowing category row.</p></div>
           <div class="category-admin-grid">
-            <input id="categoryNameInput" type="text" placeholder="Category name e.g. Couple, 3D Portrait, Attitude" />
+            <input id="categoryNameInput" type="text" aria-label="Category name" placeholder="Category name e.g. Couple, 3D Portrait, Attitude" />
             <button id="categorySaveBtn" class="primary-btn" onclick="savePromptCategory()">Save Category</button>
           </div>
           <div id="categoryAdminList" class="category-admin-list"></div>
@@ -335,15 +336,15 @@
 
 
         <div class="admin-form glass-panel admin-entry-form">
-          <input id="itemTitle" type="text" placeholder="Container title" />
-          <select id="itemCategory">
+          <input id="itemTitle" type="text" aria-label="Container title" placeholder="Container title" />
+          <select id="itemCategory" aria-label="Prompt category">
             <option value="">Select Prompt Type</option>
             <option value="Male">Male</option>
             <option value="Female">Female</option>
           </select>
           <label class="admin-check"><input id="itemTrending" type="checkbox" /> Mark as Trending</label>
-          <textarea id="itemPrompt" rows="7" placeholder="Full AI prompt..."></textarea>
-          <input id="itemImages" type="file" accept="image/*" multiple />
+          <textarea id="itemPrompt" rows="7" aria-label="Full AI prompt" placeholder="Full AI prompt..."></textarea>
+          <input id="itemImages" type="file" aria-label="Prompt images" accept="image/*" multiple />
           <button id="saveBtn" class="primary-btn full-btn" onclick="savePromptItem()">Save Container</button>
         </div>
 
