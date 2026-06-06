@@ -317,7 +317,7 @@ button,input,textarea,select{font:inherit}
   font-size:14px;
   font-weight:800;
   letter-spacing:.2px;
-  animation:noticeMove 30s linear infinite;
+  animation:noticeMove 70s linear infinite;
 }
 @keyframes noticeMove{
   0%{transform:translateX(0)}
