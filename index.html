@@ -40,6 +40,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
   <div class="page-glow glow-a"></div>
@@ -156,6 +159,10 @@
           <option value="Female">Female</option>
         </select>
       </div>
+      <div class="category-rail glass-panel">
+        <div class="category-rail-title"><span class="category-glow-word">Category</span><small>Choose a prompt style</small></div>
+        <div id="categoryPills" class="category-pills"></div>
+      </div>
 
       <div id="cardsGrid" class="cards-grid"></div>
       <div id="paginationControls" class="pagination-controls"></div>
@@ -249,6 +256,16 @@
         </div>
 
 
+                <div class="category-admin-box glass-panel">
+          <div><h3>Category Manager</h3><p>Add categories for prompt containers. New categories will appear in the glowing category row.</p></div>
+          <div class="category-admin-grid">
+            <input id="categoryNameInput" type="text" placeholder="Category name e.g. Couple, 3D Portrait, Attitude" />
+            <button id="categorySaveBtn" class="primary-btn" onclick="savePromptCategory()">Save Category</button>
+          </div>
+          <div id="categoryAdminList" class="category-admin-list"></div>
+        </div>
+
+
         <div class="admin-form glass-panel admin-entry-form">
           <input id="itemTitle" type="text" placeholder="Container title" />
           <select id="itemCategory">
@@ -276,5 +293,6 @@
     </svg>
   </a>
 
+  <button class="floating-install-app hidden" id="installAppBtn" type="button" onclick="installNexaPromApp()" aria-label="Install NexaProm app"><span class="install-ring"></span><span class="install-icon">⬇</span></button>
 </body>
 </html>
