@@ -2,12 +2,15 @@ const SUPABASE_URL = 'https://bizeppowtegiiarudswp.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_-_BzV9MA1BHzZIkrap91NQ_R5Gr0Ecl';
 const BUCKET_NAME = 'prompt-images';
 const TABLE_NAME = 'prompt_cards';
+const CATEGORIES_TABLE = 'prompt_categories';
 const NOTICE_TABLE = 'important_notice';
 const TOOLS_TABLE = 'ai_tools';
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let itemsCache = [];
+let categoriesCache = ['Male', 'Female'];
+let editingCategoryName = null;
 let editingId = null;
 let editingToolId = null;
 let toolsCache = [];
@@ -219,7 +222,7 @@ async function fetchAiTools() {
     if (error) throw error;
     toolsCache = data || [];
     renderAiTools();
-    renderToolsAdminList();
+    renderToolsAdminList(); renderCategoryAdminList();
   } catch (error) {
     console.warn('Tools fetch failed:', error);
     renderAiTools();
@@ -428,6 +431,24 @@ function changeDmLanguage() {
     void card.offsetWidth;
     card.classList.add('text-swap');
   }
+}
+
+
+let deferredInstallPrompt=null;
+function setupNexaPromInstallButton(){
+  const btn=document.getElementById('installAppBtn');
+  if(!btn) return;
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(e=>console.warn('SW failed:',e));}
+  window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredInstallPrompt=event;btn.classList.remove('hidden');});
+  window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;btn.classList.add('hidden');showToast('NexaProm installed');});
+  const standalone=window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if(standalone) btn.classList.add('hidden');
+}
+async function installNexaPromApp(){
+  const btn=document.getElementById('installAppBtn');
+  if(!deferredInstallPrompt){showToast('Use browser menu → Add to Home screen');return;}
+  deferredInstallPrompt.prompt(); await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt=null; if(btn) btn.classList.add('hidden');
 }
 
 function scrollToSection(id) {
@@ -755,12 +776,10 @@ function updateCategoryFilter(items) {
   const select = document.getElementById('categoryFilter');
   if (!select) return;
   const oldValue = select.value || 'All';
-  select.innerHTML = `
-    <option value="All">All Prompts</option>
-    <option value="Male">Male</option>
-    <option value="Female">Female</option>
-  `;
-  select.value = ['All', 'Male', 'Female'].includes(oldValue) ? oldValue : 'All';
+  const categories = getAllPromptCategories();
+  select.innerHTML = [`<option value="All">All Prompts</option>`, ...categories.map(cat => `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`)].join('');
+  select.value = oldValue === 'All' || categories.includes(oldValue) ? oldValue : 'All';
+  renderCategoryPills();
 }
 
 function cardTemplate(item) {
@@ -790,6 +809,83 @@ function cardTemplate(item) {
       </div>
     </article>
   `;
+}
+
+
+function getAllPromptCategories() {
+  const fromRows = itemsCache.map(item => item.category).filter(Boolean);
+  return [...new Set(['Male','Female',...categoriesCache,...fromRows])].filter(Boolean);
+}
+async function fetchPromptCategories() {
+  try {
+    const { data, error } = await supabaseClient.from(CATEGORIES_TABLE).select('*').order('created_at',{ascending:true});
+    if (error) throw error;
+    categoriesCache = (data || []).map(row => row.name).filter(Boolean);
+    if (!categoriesCache.includes('Male')) categoriesCache.unshift('Male');
+    if (!categoriesCache.includes('Female')) categoriesCache.splice(1,0,'Female');
+  } catch(error) { console.warn('Categories fetch failed:', error); }
+  updateCategoryFilter(itemsCache);
+  renderCategoryAdminList();
+}
+function renderCategoryPills() {
+  const wrap=document.getElementById('categoryPills'), select=document.getElementById('categoryFilter');
+  if(!wrap||!select) return;
+  const selected=select.value||'All';
+  const categories=['All',...getAllPromptCategories()];
+  wrap.innerHTML=categories.map(cat=>`<button class="category-pill-btn ${selected===cat?'active':''}" onclick="selectPromptCategory('${escapeHtml(cat)}')">${escapeHtml(cat==='All'?'All Prompts':cat)}</button>`).join('');
+}
+function selectPromptCategory(category) {
+  const select=document.getElementById('categoryFilter');
+  if(select) select.value=category;
+  currentPage=1;
+  renderGallery(true);
+}
+async function savePromptCategory() {
+  const input=document.getElementById('categoryNameInput');
+  const name=input?.value?.trim()||'';
+  if(!name){showToast('Enter category name');return;}
+  try{
+    if(editingCategoryName){
+      const {error}=await supabaseClient.from(CATEGORIES_TABLE).update({name,updated_at:new Date().toISOString()}).eq('name',editingCategoryName);
+      if(error) throw error; showToast('Category updated');
+    }else{
+      const {error}=await supabaseClient.from(CATEGORIES_TABLE).insert({name});
+      if(error) throw error; showToast('Category added');
+    }
+    editingCategoryName=null; if(input) input.value='';
+    const btn=document.getElementById('categorySaveBtn'); if(btn) btn.textContent='Save Category';
+    await fetchPromptCategories();
+  }catch(error){console.error(error);showToast(error.message||'Category save failed');}
+}
+function editPromptCategory(name){
+  editingCategoryName=name;
+  const input=document.getElementById('categoryNameInput'), btn=document.getElementById('categorySaveBtn');
+  if(input) input.value=name; if(btn) btn.textContent='Update Category';
+  showToast('Category edit mode enabled');
+}
+async function deletePromptCategory(name){
+  if(name==='Male'||name==='Female'){showToast('Default categories cannot be deleted');return;}
+  if(!confirm('Delete this category? Existing prompt cards will keep their saved category text.')) return;
+  try{
+    const {error}=await supabaseClient.from(CATEGORIES_TABLE).delete().eq('name',name);
+    if(error) throw error;
+    await fetchPromptCategories(); showToast('Category deleted');
+  }catch(error){console.error(error);showToast(error.message||'Category delete failed');}
+}
+function renderCategoryAdminList(){
+  const list=document.getElementById('categoryAdminList'), itemSelect=document.getElementById('itemCategory');
+  const categories=getAllPromptCategories();
+  if(itemSelect){
+    const old=itemSelect.value||'';
+    itemSelect.innerHTML=[`<option value="">Select Prompt Type</option>`,...categories.map(cat=>`<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`)].join('');
+    itemSelect.value=categories.includes(old)?old:'';
+  }
+  if(!list) return;
+  list.innerHTML=categories.map(cat=>`<div class="category-admin-item"><b>${escapeHtml(cat)}</b>${cat==='Male'||cat==='Female'?'':`<button type="button" title="Edit" onclick="editPromptCategory('${escapeHtml(cat)}')">✎</button><button type="button" title="Delete" onclick="deletePromptCategory('${escapeHtml(cat)}')">×</button>`}</div>`).join('');
+}
+function subscribePromptCategories(){
+  try{ supabaseClient.channel('prompt_categories_live').on('postgres_changes',{event:'*',schema:'public',table:CATEGORIES_TABLE},()=>fetchPromptCategories()).subscribe(); }
+  catch(error){console.warn('Categories subscription failed:',error);}
 }
 
 function renderGallery(resetPage = false) {
@@ -1030,7 +1126,7 @@ async function checkAdminState() {
   const hasSession = !!data.session;
   document.getElementById('loginView').classList.toggle('hidden', hasSession);
   document.getElementById('adminView').classList.toggle('hidden', !hasSession);
-  if (hasSession) { renderAdminList(); fetchImportantNotice(); renderToolsAdminList(); }
+  if (hasSession) { renderAdminList(); fetchImportantNotice(); renderToolsAdminList(); renderCategoryAdminList(); }
 }
 
 function clearForm() {
@@ -1091,6 +1187,8 @@ async function savePromptItem() {
 
     clearForm();
     await fetchItems();
+fetchPromptCategories();
+subscribePromptCategories();
 
     renderAdminList();
   } catch (error) {
@@ -1158,6 +1256,7 @@ function handleSecretAdminClick() {
 
 supabaseClient.auth.onAuthStateChange(() => checkAdminState());
 setupHideTopbarOnScroll();
+setupNexaPromInstallButton();
 setupScrollDubSound();
 fetchItems();
 startLiveVisitCounter();
